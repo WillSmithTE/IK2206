@@ -1,10 +1,9 @@
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.util.Base64;
 
 import static java.util.Base64.getEncoder;
@@ -18,6 +17,7 @@ public class SessionKey {
     private KeyGenerator keyGenerator;
 
     public SessionKey(Integer keyLength) {
+
         try {
             keyGenerator = KeyGenerator.getInstance(ALGORITHM_NAME);
             keyGenerator.init(keyLength);
@@ -29,8 +29,29 @@ public class SessionKey {
     }
 
     public SessionKey(String encodedKey) {
+//
+//        while (encodedKey.length() < 16) {
+//            encodedKey += " ";
+//        }
+
+        byte[] decodedKey = getDecoder().decode(encodedKey);
+        byte[] paddedDecodedKey = new byte[16];
+        if (decodedKey.length < 16) {
+            int index = 0;
+            while (index < decodedKey.length) {
+                paddedDecodedKey[index] = decodedKey[index];
+                index++;
+            }
+            while (index < 16) {
+                paddedDecodedKey[index] = ' ';
+                index++;
+            }
+        }
+
+        key = new SecretKeySpec(paddedDecodedKey, ALGORITHM_NAME);
+
 //        byte[] decodedKey = getDecoder().decode(encodedKey);
-        key = new SecretKeySpec(encodedKey.getBytes(StandardCharsets.UTF_8), 0, encodedKey.length(), ALGORITHM_NAME);
+//        key = new SecretKeySpec(encodedKey.getBytes(StandardCharsets.UTF_8), 0, encodedKey.length(), ALGORITHM_NAME);
     }
 
     public static void main(String[] args) {
@@ -45,7 +66,27 @@ public class SessionKey {
     }
 
     public String encodeKey() {
-        return new String(key.getEncoded());
+
+//        try {
+//            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+//            cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
+//            return new String(cipher.doFinal());
+//        } catch (NoSuchAlgorithmException e) {
+//            e.printStackTrace();
+//        } catch (NoSuchPaddingException e) {
+//            e.printStackTrace();
+//        } catch (InvalidAlgorithmParameterException e) {
+//            e.printStackTrace();
+//        } catch (InvalidKeyException e) {
+//            e.printStackTrace();
+//        } catch (BadPaddingException e) {
+//            e.printStackTrace();
+//        } catch (IllegalBlockSizeException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return null;
+        return getEncoder().encodeToString(key.getEncoded());
     }
 
     private static void testKeyRandomness() {
@@ -63,8 +104,7 @@ public class SessionKey {
 
         final String afterEncodedKey = key.encodeKey();
 
-        assert(afterEncodedKey.equals(encodedKey));
-
+        assert (afterEncodedKey.equals(encodedKey));
 
 
     }
@@ -88,8 +128,10 @@ public class SessionKey {
     }
 
     private static void compareKeys(SessionKey sk1, SessionKey sk2) {
-        byte[] decoded1 = Base64.getDecoder().decode(sk1.encodeKey());
-        byte[] decoded2 = Base64.getDecoder().decode(sk2.encodeKey());
+        String sk1Encoded = sk1.encodeKey(),
+                sk2Encoded = sk2.encodeKey();
+        byte[] decoded1 = Base64.getDecoder().decode(sk1Encoded);
+        byte[] decoded2 = Base64.getDecoder().decode(sk2Encoded);
         int keyLength = decoded1.length;
         int similarities = 0;
 
