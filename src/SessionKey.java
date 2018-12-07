@@ -1,8 +1,5 @@
 import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.Base64;
 
@@ -17,7 +14,6 @@ public class SessionKey {
     private KeyGenerator keyGenerator;
 
     public SessionKey(Integer keyLength) {
-
         try {
             keyGenerator = KeyGenerator.getInstance(ALGORITHM_NAME);
             keyGenerator.init(keyLength);
@@ -25,15 +21,9 @@ public class SessionKey {
         } catch (NoSuchAlgorithmException e) {
             System.out.println(e.getMessage());
         }
-
     }
 
     public SessionKey(String encodedKey) {
-//
-//        while (encodedKey.length() < 16) {
-//            encodedKey += " ";
-//        }
-
         byte[] decodedKey = getDecoder().decode(encodedKey);
         byte[] paddedDecodedKey = new byte[16];
         if (decodedKey.length < 16) {
@@ -47,11 +37,7 @@ public class SessionKey {
                 index++;
             }
         }
-
         key = new SecretKeySpec(paddedDecodedKey, ALGORITHM_NAME);
-
-//        byte[] decodedKey = getDecoder().decode(encodedKey);
-//        key = new SecretKeySpec(encodedKey.getBytes(StandardCharsets.UTF_8), 0, encodedKey.length(), ALGORITHM_NAME);
     }
 
     public static void main(String[] args) {
@@ -66,26 +52,6 @@ public class SessionKey {
     }
 
     public String encodeKey() {
-
-//        try {
-//            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
-//            cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
-//            return new String(cipher.doFinal());
-//        } catch (NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//        } catch (NoSuchPaddingException e) {
-//            e.printStackTrace();
-//        } catch (InvalidAlgorithmParameterException e) {
-//            e.printStackTrace();
-//        } catch (InvalidKeyException e) {
-//            e.printStackTrace();
-//        } catch (BadPaddingException e) {
-//            e.printStackTrace();
-//        } catch (IllegalBlockSizeException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return null;
         return getEncoder().encodeToString(key.getEncoded());
     }
 
@@ -94,7 +60,6 @@ public class SessionKey {
         SessionKey sk2 = new SessionKey(DEFAULT_KEY_LENGTH);
 
         compareKeys(sk1, sk2);
-
     }
 
     private static void testIsSymmetrical() {
@@ -120,7 +85,6 @@ public class SessionKey {
         final int EXPECTED_KEY_LENGTH = 16;
 
         SessionKey sk1 = new SessionKey(DEFAULT_KEY_LENGTH);
-
         checkKeyIsLength(sk1, EXPECTED_KEY_LENGTH);
 
         SessionKey sk2 = new SessionKey(getEncoder().encodeToString("derp".getBytes()));
@@ -160,7 +124,6 @@ public class SessionKey {
         System.out.println(isPass ?
                 "Pass" :
                 "Fail: " + failMessage);
-
     }
 
 }
