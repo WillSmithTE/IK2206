@@ -28,7 +28,7 @@ public class VerifyCertificate {
         }
     }
 
-    private static X509Certificate fetchCertificate(String filename) throws FileNotFoundException, CertificateException {
+    static X509Certificate fetchCertificate(String filename) throws FileNotFoundException, CertificateException {
         FileInputStream fileInputStream = new FileInputStream(filename);
         BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
         CertificateFactory factory = CertificateFactory.getInstance(CERT_FACTORY_NAME);
@@ -36,7 +36,7 @@ public class VerifyCertificate {
         return (X509Certificate) cert;
     }
 
-    private static void verifyCertificate(X509Certificate cert, PublicKey publicKey) throws CertificateException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    static void verifyCertificate(X509Certificate cert, PublicKey publicKey) throws CertificateException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         cert.checkValidity();
         cert.verify(publicKey);
     }
